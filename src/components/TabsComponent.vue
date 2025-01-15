@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-tabs v-model="activeTab" class="text-teal" align="justify">
+    <q-tabs v-model="activeTab" class="text-blue" align="justify">
       <q-tab name="form" label="Formulario" icon="edit" />
       <q-tab name="tab2" label="Pestaña 2" icon="dashboard" />
       <q-tab name="tab3" label="Pestaña 3" icon="apps" />

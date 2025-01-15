@@ -1,39 +1,50 @@
-import { onMounted, onUnmounted, reactive } from "vue";
+import { ref, watch } from "vue";
 
 export function usePostMessage(
   { type, targetOrigin = "*" },
   onMessageCallback
 ) {
-  const eventData = reactive();
+  const isActive = ref(false); // Controla si el listener está activo
   // Enviar un mensaje al window.parent
   const postMessage = (message) => {
+    isActive.value = true;
     window.parent.postMessage(
       {
         type,
-        ...message, // Permite agregar datos adicionales
+        data: { ...message }, // Permite agregar datos adicionales
       },
       targetOrigin
     );
+    console.log({
+      type,
+      data: { ...message }, // Permite agregar datos adicionales
+    });
   };
 
   // Registrar el listener para recibir mensajes
   const handleMessage = (event) => {
     if (typeof onMessageCallback === "function") {
       onMessageCallback(event);
+      isActive.value = false;
     }
   };
 
-  onMounted(() => {
-    console.log("Componente montado, escuchando mensajes");
-    window.addEventListener("message", handleMessage);
-  });
-
-  onUnmounted(() => {
-    console.log("Componente desmontado, limpiando listener");
-    window.removeEventListener("message", handleMessage);
-  });
+  // Usar watcher para activar/desactivar dinámicamente
+  watch(
+    isActive,
+    (newValue) => {
+      if (newValue) {
+        console.log("Activando listener de mensajes");
+        window.addEventListener("message", handleMessage);
+      } else {
+        console.log("Desactivando listener de mensajes");
+        window.removeEventListener("message", handleMessage);
+      }
+    },
+    { immediate: true } // Ejecutar inmediatamente para configurar el estado inicial
+  );
 
   return {
-    postMessage
+    postMessage,
   };
 }
